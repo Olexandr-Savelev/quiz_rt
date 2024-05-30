@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [teamName, setTeamName] = useState("");
   const [points, setPoints] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/get-game", { method: "GET" });
+  }, []);
 
   const onBtnClick = async () => {
     if (teamName) {
