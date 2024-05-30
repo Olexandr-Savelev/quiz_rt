@@ -1,17 +1,17 @@
 "use client";
 
 import { pusherClient } from "@/lib/pusher";
+import Team from "@/types/team";
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
-  const [teams, setTeams] = useState<string[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
     const channel = pusherClient.subscribe("channel");
 
-    channel.bind("addTeam", (res: { team: string }) => {
-      console.log(`MESSAGE: ${res.team}`);
-      setTeams((prev) => [...prev, res.team]);
+    channel.bind("addTeam", (team: Team) => {
+      setTeams((prev) => [...prev, team]);
     });
 
     return () => {
@@ -20,10 +20,61 @@ const Page = () => {
     };
   }, []);
   return (
-    <div>
+    <>
       <h2>ADMIN PAGE </h2>
-      <div>{teams}</div>
-    </div>
+      <div className="relative overflow-x-auto">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                className="px-6 py-3"
+              >
+                Team name
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3"
+              >
+                Points
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3"
+              >
+                Bet
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {teams.map((team) => (
+              <tr
+                key={team.id}
+                className="bg-white border-b"
+              >
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap "
+                >
+                  {team.name}
+                </th>
+                <td className="px-6 py-4">{team.points}</td>
+                <td className="px-6 py-4">{team.bet}</td>
+                <td className="px-6 py-4">
+                  <button>Edit</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 };
 
