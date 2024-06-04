@@ -8,6 +8,11 @@ const Page = () => {
   const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
+    fetch("/api/get-teams", { method: "GET" })
+      .then((res) => res.json())
+      .then((res) => {
+        setTeams(res.teams);
+      });
     const channel = pusherClient.subscribe("channel");
 
     channel.bind("addTeam", (team: Team) => {
@@ -20,8 +25,8 @@ const Page = () => {
     };
   }, []);
 
-  const startGame = () => {
-    fetch("/api/game", { method: "POST" }).then((res) => {
+  const startGame = async () => {
+    await fetch("/api/game", { method: "POST" }).then((res) => {
       console.log(`Game Started ${res}`);
     });
   };
