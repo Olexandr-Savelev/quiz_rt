@@ -1,18 +1,28 @@
 "use client";
 
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { pusherClient } from "@/lib/pusher";
 import Team from "@/types/team";
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
   const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch("/api/get-teams", { method: "GET" })
       .then((res) => res.json())
       .then((res) => {
         setTeams(res.teams);
+      })
+      .catch((e) => {
+        console.error(e);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
+
     const channel = pusherClient.subscribe("channel");
 
     channel.bind("addTeam", (team: Team) => {
@@ -25,11 +35,11 @@ const Page = () => {
     };
   }, []);
 
-  const startGame = async () => {
+  async function startGame() {
     await fetch("/api/game", { method: "POST" }).then((res) => {
       console.log(`Game Started ${res}`);
     });
-  };
+  }
 
   return (
     <>
@@ -86,6 +96,7 @@ const Page = () => {
             ))}
           </tbody>
         </table>
+        {isLoading && <LoadingSpinner />}
       </div>
     </>
   );
