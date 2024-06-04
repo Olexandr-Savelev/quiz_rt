@@ -19,8 +19,16 @@ const Page = () => {
       channel.unsubscribe();
     };
   }, []);
+
+  const startGame = () => {
+    fetch("/api/game", { method: "POST" }).then((res) => {
+      console.log(`Game Started ${res}`);
+    });
+  };
+
   return (
     <>
+      <button onClick={startGame}>Start Game</button>
       <h2>ADMIN PAGE </h2>
       <div className="relative overflow-x-auto">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500">

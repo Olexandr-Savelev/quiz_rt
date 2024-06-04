@@ -15,7 +15,7 @@ generator client {
 
 model Game {
    id      String   @id @default(auto()) @map("_id") @db.ObjectId
-   round   Round[]      
+   rounds  Round[]    
 }
 
 model Round {
@@ -29,7 +29,7 @@ model Round {
 model Team {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId
   name     String   @unique
-  pints    Int      @default(0)
+  points   Int      @default(0)
   bet      Int      @default(0)
   round    Round?   @relation(fields: [roundId], references: [id])
   roundId  String?  @db.ObjectId

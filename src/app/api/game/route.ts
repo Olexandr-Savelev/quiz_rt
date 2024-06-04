@@ -27,3 +27,13 @@ export async function GET(req: Request) {
     );
   }
 }
+
+export async function POST(req: Request) {
+  const game = await prisma.game.create({
+    data: {},
+  });
+
+  return new NextResponse(JSON.stringify({ success: true, game }), {
+    status: 201,
+  });
+}
