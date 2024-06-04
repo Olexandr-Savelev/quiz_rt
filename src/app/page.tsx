@@ -1,27 +1,33 @@
 "use client";
 
+import Input from "@/components/ui/input";
 import { addTeamSchema } from "@/lib/zod/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-type FormData = z.infer<typeof addTeamSchema>;
+type TeamFormData = z.infer<typeof addTeamSchema>;
 
 export default function Home() {
   const {
     handleSubmit,
     register,
-    formState: { errors, isSubmitting, isDirty, isValid },
-  } = useForm<FormData>({
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<TeamFormData>({
     resolver: zodResolver(addTeamSchema),
+    mode: "all",
+    defaultValues: {
+      teamName: "",
+      points: 0,
+    },
   });
 
   useEffect(() => {
     fetch("/api/game", { method: "GET" });
   }, []);
 
-  async function onSubmit(data: FormData) {
+  async function onSubmit(data: TeamFormData) {
     try {
       const response = await fetch("/api/team", {
         method: "POST",
@@ -36,7 +42,6 @@ export default function Home() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
     }
   }
 
@@ -46,53 +51,28 @@ export default function Home() {
       method="POST"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="relative">
-        <label
-          className="mb-1 block text-sm font-medium text-black"
-          htmlFor="teamName"
-        >
-          Team name:
-        </label>
-        <input
-          {...register("teamName", { required: true })}
-          name="teamName"
-          id="teamName"
-          className="mb-6 w-full rounded-lg border-[1.5px] px-3 py-2 text-black outline-none transition focus:border-blue-500 active:border-primary disabled:cursor-default disabled:bg-whiter"
-        />
-        {errors?.teamName && (
-          <p className="text-red-600 text-sm absolute bottom-0 left-0">
-            {errors?.teamName?.message}
-          </p>
-        )}
-      </div>
-
-      <div className="relative">
-        <label
-          className="mb-1 block text-sm font-medium text-black"
-          htmlFor="points"
-        >
-          Points:
-        </label>
-        <input
-          {...register("points", { required: true })}
-          name="points"
-          type="number"
-          id="points"
-          className="mb-6 w-full rounded-lg border-[1.5px] px-3 py-2 text-black outline-none transition focus:border-blue-500 active:border-primary disabled:cursor-default disabled:bg-whiter"
-        />
-        {errors?.points && (
-          <p className="text-red-600 text-sm absolute bottom-0 left-0">
-            {errors?.points?.message}
-          </p>
-        )}
-      </div>
-
+      <Input
+        register={register}
+        type="text"
+        name="teamName"
+        label="Team name"
+        error={errors?.teamName?.message}
+        required
+      />
+      <Input
+        register={register}
+        name="points"
+        type="number"
+        label="Points"
+        error={errors?.points?.message}
+        required
+      />
       <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
         disabled={isSubmitting || !isValid}
         type="submit"
       >
-        {isSubmitting ? "Loading" : "Submit"}
+        {isSubmitting ? "Submitting..." : "Submit"}
       </button>
     </form>
   );

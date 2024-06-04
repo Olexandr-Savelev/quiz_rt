@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 export const addTeamSchema = z.object({
-  teamName: z.string().min(3),
+  teamName: z
+    .string({
+      required_error: "Team name is required",
+    })
+    .min(3, { message: "Must be more than 2 characters" }),
   points: z.preprocess(
     (value) => {
       const parsedValue = parseInt(z.string().parse(value), 10);
