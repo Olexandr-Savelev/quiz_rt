@@ -11,7 +11,7 @@ const Page = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch("/api/get-teams", { method: "GET" })
+    fetch("/api/team", { method: "GET" })
       .then((res) => res.json())
       .then((res) => {
         setTeams(res.teams);

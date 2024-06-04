@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
-    const game = await prisma.game.findFirst();
+    const game = await prisma.game.findMany();
     if (game) {
       return new NextResponse(JSON.stringify({ success: true, game }), {
         status: 200,

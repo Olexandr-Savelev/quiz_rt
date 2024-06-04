@@ -23,7 +23,7 @@ export default function Home() {
 
   async function onSubmit(data: FormData) {
     try {
-      const response = await fetch("/api/add-team", {
+      const response = await fetch("/api/team", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
