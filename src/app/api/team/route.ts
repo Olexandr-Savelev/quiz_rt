@@ -29,11 +29,11 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const teams = await prisma.team.findMany();
-    return new Response(JSON.stringify({ success: true, teams }), {
+    return new NextResponse(JSON.stringify({ success: true, teams }), {
       status: 200,
     });
   } catch (error) {
-    return new Response(
+    return new NextResponse(
       JSON.stringify({ success: false, message: "Internal server error" }),
       { status: 500 }
     );

@@ -6,10 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { addTeamSchema } from "@/lib/zod/zodSchema";
 
 import Input from "../ui/input";
+import { useRouter } from "next/navigation";
 
 type TeamFormData = z.infer<typeof addTeamSchema>;
 
 export default function TeamForm() {
+  const router = useRouter();
+  3;
   const {
     handleSubmit,
     register,
@@ -25,7 +28,7 @@ export default function TeamForm() {
 
   async function onSubmit(data: TeamFormData) {
     try {
-      const response = await fetch("/api/team", {
+      const res = await fetch("/api/team", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,9 +36,12 @@ export default function TeamForm() {
         body: JSON.stringify({ name: data.teamName, points: data.points }),
       });
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error("Failed to submit the data. Please try again.");
       }
+
+      const resData = await res.json();
+      router.push(`/team/${resData.team.id}`);
     } catch (error) {
       console.error(error);
     }
