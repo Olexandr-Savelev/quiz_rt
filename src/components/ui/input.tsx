@@ -8,7 +8,8 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   label: string;
   name: string;
-  //TODO: FIX type issue
+  //TODO: FIX register type issue.
+  // register: UseFormRegister<FieldValues>;
   register: any;
 }
 
@@ -38,11 +39,11 @@ export default function Input({
         {...rest}
         className={cn(
           "mb-6 w-full rounded-lg border-[1.5px] px-3 py-2 text-black outline-none transition focus:border-blue-500 active:border-primary disabled:cursor-default disabled:bg-whiter",
-          error && "border-red-600 focus:border-red-600 active:border-red-600"
+          error && "border-red-500 focus:border-red-500 active:border-red-500"
         )}
       />
       {error && (
-        <span className="text-sm text-red-600 absolute bottom-0 left-0">
+        <span className="text-sm text-red-500 absolute bottom-0 left-0">
           {error}
         </span>
       )}
