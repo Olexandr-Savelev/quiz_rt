@@ -15,8 +15,7 @@ export default function GameStatus() {
 
   useEffect(() => {
     getGameStatus().then((game) => {
-      const gameStarted = !!game.id;
-      setIsGame(gameStarted);
+      setIsGame(!!game);
     });
   }, []);
 

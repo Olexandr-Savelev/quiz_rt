@@ -3,4 +3,5 @@ export default interface Team {
   name: string;
   points: number;
   bet: number;
+  roundId: string | null;
 }
