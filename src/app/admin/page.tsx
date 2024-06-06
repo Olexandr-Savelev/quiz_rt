@@ -5,16 +5,24 @@ import { pusherClient } from "@/lib/pusher";
 import Team from "@/types/team";
 import React, { useEffect, useState } from "react";
 
+async function getTeams() {
+  const res = await fetch("/api/team", { method: "GET" });
+  const data = await res.json();
+
+  return data.teams;
+}
+
 const Page = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const channel = pusherClient.subscribe("channel");
+
   useEffect(() => {
     setIsLoading(true);
-    fetch("/api/team", { method: "GET" })
-      .then((res) => res.json())
-      .then((res) => {
-        setTeams(res.teams);
+    getTeams()
+      .then((teams) => {
+        setTeams(teams);
       })
       .catch((e) => {
         console.error(e);
@@ -22,8 +30,6 @@ const Page = () => {
       .finally(() => {
         setIsLoading(false);
       });
-
-    const channel = pusherClient.subscribe("channel");
 
     channel.bind("addTeam", (team: Team) => {
       setTeams((prev) => [...prev, team]);
@@ -34,6 +40,19 @@ const Page = () => {
       channel.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    channel.unbind("placeBet");
+    channel.bind("placeBet", placeBet);
+  }, [JSON.stringify(teams)]);
+
+  function placeBet({ teamId, bet }: { teamId: string; bet: number }) {
+    const team = teams.find((t: Team) => t.id === teamId);
+    if (team) {
+      team.bet = bet;
+      setTeams([...teams]);
+    }
+  }
 
   async function startGame() {
     await fetch("/api/game", { method: "POST" }).then((res) => {

@@ -1,9 +1,9 @@
 import prisma from "@/lib/db/db";
-import { NextApiRequest } from "next";
-import { NextResponse } from "next/server";
+import { pusherServer } from "@/lib/pusher";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  req: NextApiRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -18,7 +18,28 @@ export async function GET(
     return new NextResponse(JSON.stringify({ success: true, team }), {
       status: 200,
     });
-  } catch (err) {
+  } catch (error) {
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "Internal server error" }),
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { bet } = await req.json();
+
+    await pusherServer.trigger("channel", "placeBet", {
+      teamId: params.id,
+      bet: bet,
+    });
+
+    return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
+  } catch (error) {
     return new NextResponse(
       JSON.stringify({ success: false, message: "Internal server error" }),
       { status: 500 }

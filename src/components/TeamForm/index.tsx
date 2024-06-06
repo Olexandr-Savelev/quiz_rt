@@ -12,7 +12,7 @@ type TeamFormData = z.infer<typeof addTeamSchema>;
 
 export default function TeamForm() {
   const router = useRouter();
-  3;
+
   const {
     handleSubmit,
     register,
