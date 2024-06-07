@@ -5,9 +5,10 @@ import React, { useEffect, useState } from "react";
 import GameTable from "@/components/GameTable";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 
-import { pusherClient } from "@/lib/pusher";
+import { pusherClient } from "@/lib/pusher/pusher";
 
 import Team from "@/types/team";
+import useGameStatus from "@/hooks/useGameStatus";
 
 async function getTeams() {
   const res = await fetch("/api/team", { method: "GET" });
@@ -19,6 +20,7 @@ async function getTeams() {
 const Page = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { isGame, startGame, endGame } = useGameStatus();
 
   const channel = pusherClient.subscribe("channel");
 
@@ -35,9 +37,7 @@ const Page = () => {
         setIsLoading(false);
       });
 
-    channel.bind("addTeam", (team: Team) => {
-      setTeams((prev) => [...prev, team]);
-    });
+    channel.bind("addTeam", addTeam);
 
     return () => {
       channel.unbind_all();
@@ -50,6 +50,10 @@ const Page = () => {
     channel.bind("placeBet", placeBet);
   }, [JSON.stringify(teams)]);
 
+  function addTeam(team: Team) {
+    setTeams((prev) => [...prev, team]);
+  }
+
   function placeBet({ teamId, bet }: { teamId: string; bet: number }) {
     const team = teams.find((t: Team) => t.id === teamId);
     if (team) {
@@ -58,15 +62,14 @@ const Page = () => {
     }
   }
 
-  async function startGame() {
-    await fetch("/api/game", { method: "POST" }).then((res) => {
-      console.log(`Game Started ${res}`);
-    });
-  }
-
   return (
     <>
-      <button onClick={startGame}>Start Game</button>
+      {!isGame ? (
+        <button onClick={startGame}>Start Game</button>
+      ) : (
+        <button onClick={endGame}>Stop Game</button>
+      )}
+
       <h2>ADMIN PAGE</h2>
       <div className="relative overflow-x-auto">
         <GameTable teams={teams} />

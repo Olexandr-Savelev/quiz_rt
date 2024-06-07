@@ -1,25 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import TeamForm from "../TeamForm";
 import LoadingSpinner from "../ui/loadingSpinner";
-
-async function getGameStatus() {
-  const res = await fetch("/api/game", { method: "GET" });
-  const data = await res.json();
-  return data.game;
-}
+import useGameStatus from "@/hooks/useGameStatus";
 
 export default function GameStatus() {
-  const [isGame, setIsGame] = useState<boolean | null>(null);
+  const { isGame, isGameLoading } = useGameStatus();
 
-  useEffect(() => {
-    getGameStatus().then((game) => {
-      setIsGame(!!game);
-    });
-  }, []);
-
-  if (isGame === null) {
+  if (isGame === null || isGameLoading) {
     return <LoadingSpinner />;
   }
 
