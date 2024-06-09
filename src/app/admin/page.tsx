@@ -9,6 +9,11 @@ import { pusherClient } from "@/lib/pusher/pusher";
 
 import Team from "@/types/team";
 import useGameStatus from "@/hooks/useGameStatus";
+import {
+  calcBetsSum,
+  updateWinnersTeamsPoints,
+} from "@/lib/helpers/pointsCalculations";
+import { mergeTeamsById } from "@/lib/helpers/mergeTeams";
 
 async function getTeams() {
   const res = await fetch("/api/team", { method: "GET" });
@@ -112,29 +117,18 @@ const Page = () => {
   }
 
   const onRoundEnds = () => {
-    const prizePool = sumTeamsBets(teams);
-    const winnersBetSum = sumTeamsBets(selectedTeams);
-
-    const updatedSelectedTeams = selectedTeams.map((team) => {
-      const percentOfPool = (team.bet * 100) / winnersBetSum;
-
-      const prize = +((percentOfPool * prizePool) / 100).toFixed(2);
-      const newPoints = team.points + prize;
-      return { ...team, points: newPoints };
-    });
-
-    const teamsIds = teams.map((t) => t.id);
-
-    const result = [...teams];
-
-    for (let i = 0; i < updatedSelectedTeams.length; i++) {
-      let selectedTeamId = updatedSelectedTeams[i].id;
-      if (teamsIds.includes(selectedTeamId)) {
-        result[teamsIds.indexOf(selectedTeamId)] = updatedSelectedTeams[i];
-      }
+    if (teams.length === selectedTeams.length || selectedTeams.length === 0) {
+      setSelectedTeams([]);
+      return;
     }
 
-    setTeams(result);
+    const prizePool = calcBetsSum(teams);
+
+    const winnersTeams = updateWinnersTeamsPoints(selectedTeams, prizePool);
+
+    const newTeams = mergeTeamsById(teams, winnersTeams);
+    setSelectedTeams([]);
+    setTeams(newTeams);
   };
 
   return (
