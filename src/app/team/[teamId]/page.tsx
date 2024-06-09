@@ -8,7 +8,7 @@ import Input from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { betSchema } from "@/lib/zod/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { set, z } from "zod";
 
 async function getTeam(teamId: string) {
   const res = await fetch(`/api/team/${teamId}`);
@@ -40,16 +40,24 @@ const Page = ({ params }: { params: { teamId: string } }) => {
   if (!team) return <LoadingSpinner />;
 
   async function onSubmit(data: BetFormData) {
+    const teamPoints = team!.points - data.bet;
     const res = await fetch(`/api/team/${team!.id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ bet: data.bet }),
+      body: JSON.stringify({ bet: data.bet, points: teamPoints }),
     });
     if (!res.ok) {
       throw new Error("Failed to submit the data. Please try again.");
     }
+    setTeam({
+      id: team!.id,
+      name: team!.name,
+      points: teamPoints,
+      bet: data.bet,
+      roundId: team!.roundId,
+    });
   }
 
   return (

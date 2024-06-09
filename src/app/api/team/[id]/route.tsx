@@ -31,11 +31,12 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { bet } = await req.json();
+    const { bet, points } = await req.json();
 
     await pusherServer.trigger("channel", "placeBet", {
       teamId: params.id,
       bet: bet,
+      points: points,
     });
 
     return new NextResponse(JSON.stringify({ success: true }), { status: 200 });

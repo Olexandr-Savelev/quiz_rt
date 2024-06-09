@@ -9,9 +9,8 @@ export default function useGameStatus() {
       setIsGameLoading(true);
       const res = await fetch("/api/game", { method: "GET" });
       const data = await res.json();
-      if (data.game) {
-        setIsGame(true);
-      }
+
+      data.game ? setIsGame(true) : setIsGame(false);
     } catch (error) {
       console.error(error);
     }

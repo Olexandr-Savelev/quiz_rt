@@ -5,26 +5,17 @@ import Team from "@/types/team";
 
 interface GameTableProps {
   teams: Team[];
+  selectedTeams: Team[];
+  handleSelectedTeams: (team: Team) => void;
 }
 
-export default function GameTable({ teams }: GameTableProps) {
-  const [selectedTeamIds, setSelectedTeamIds] = useState<string[]>([]);
-
-  const handleRowClick = (teamId: string) => {
-    setSelectedTeamIds((prevSelectedTeamIds) => {
-      if (prevSelectedTeamIds.includes(teamId)) {
-        return prevSelectedTeamIds.filter((id) => id !== teamId);
-      } else {
-        return [...prevSelectedTeamIds, teamId];
-      }
-    });
-  };
-
-  const calcPrizePool = () => {
-    const pool = teams.reduce((acc, cur) => {
-      return acc + cur.bet;
-    }, 0);
-    console.log(pool);
+export default function GameTable({
+  teams,
+  selectedTeams,
+  handleSelectedTeams,
+}: GameTableProps) {
+  const handleRowClick = (team: Team) => {
+    handleSelectedTeams(team);
   };
 
   return (
@@ -64,9 +55,9 @@ export default function GameTable({ teams }: GameTableProps) {
               key={team.id}
               className={cn(
                 "bg-white border-b",
-                selectedTeamIds.includes(team.id) && "bg-green-100"
+                selectedTeams.includes(team) && "bg-green-100"
               )}
-              onClick={() => handleRowClick(team.id)}
+              onClick={() => handleRowClick(team)}
             >
               <th
                 scope="row"
@@ -83,7 +74,6 @@ export default function GameTable({ teams }: GameTableProps) {
           ))}
         </tbody>
       </table>
-      <button onClick={calcPrizePool}>GET PRIZE POOL</button>
     </>
   );
 }
