@@ -8,7 +8,8 @@ import Input from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { betSchema } from "@/lib/zod/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, z } from "zod";
+import { z } from "zod";
+import { pusherClient } from "@/lib/pusher/pusher";
 
 async function getTeam(teamId: string) {
   const res = await fetch(`/api/team/${teamId}`);
@@ -35,6 +36,14 @@ const Page = ({ params }: { params: { teamId: string } }) => {
     getTeam(params.teamId).then((team) => {
       setTeam(team);
     });
+
+    const channel = pusherClient.subscribe("channel");
+
+    channel.bind("roundEnds", () => {
+      getTeam(params.teamId).then((team) => {
+        setTeam(team);
+      });
+    });
   }, [params]);
 
   if (!team) return <LoadingSpinner />;
@@ -52,11 +61,9 @@ const Page = ({ params }: { params: { teamId: string } }) => {
       throw new Error("Failed to submit the data. Please try again.");
     }
     setTeam({
-      id: team!.id,
-      name: team!.name,
+      ...team!,
       points: teamPoints,
       bet: data.bet,
-      roundId: team!.roundId,
     });
   }
 

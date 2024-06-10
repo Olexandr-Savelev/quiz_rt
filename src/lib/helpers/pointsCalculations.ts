@@ -9,7 +9,6 @@ export function updateWinnersTeamsPoints(teams: Team[], prizePool: number) {
 
   return teams.map((team) => {
     const percentOfPool = (team.bet * 100) / winnersBetSum;
-
     const prize = +((percentOfPool * prizePool) / 100).toFixed(2);
     const newPoints = team.points + prize;
     return { ...team, points: newPoints };

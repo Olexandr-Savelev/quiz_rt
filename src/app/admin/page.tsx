@@ -6,6 +6,7 @@ import GameTable from "@/components/GameTable";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 
 import { pusherClient } from "@/lib/pusher/pusher";
+import { mergeTeamsById } from "@/lib/helpers/mergeTeams";
 
 import Team from "@/types/team";
 import useGameStatus from "@/hooks/useGameStatus";
@@ -13,7 +14,6 @@ import {
   calcBetsSum,
   updateWinnersTeamsPoints,
 } from "@/lib/helpers/pointsCalculations";
-import { mergeTeamsById } from "@/lib/helpers/mergeTeams";
 
 async function getTeams() {
   const res = await fetch("/api/team", { method: "GET" });
@@ -22,7 +22,8 @@ async function getTeams() {
   return data.teams;
 }
 
-async function updateTeamsPoints(teams: Team[]) {
+async function updateTeams(teams: Team[]) {
+  console.log(teams);
   try {
     const res = await fetch("/api/team", {
       method: "PATCH",
@@ -36,8 +37,9 @@ async function updateTeamsPoints(teams: Team[]) {
       throw new Error("Failed to submit the data. Please try again.");
     }
 
-    const resData = await res.json();
-    console.log(resData);
+    const { updatedTeams } = await res.json();
+    console.log(updatedTeams);
+    return updatedTeams;
   } catch (error) {
     console.error(error);
   }
@@ -61,10 +63,6 @@ const Page = () => {
         return [...prevSelectedTeams, team];
       }
     });
-  };
-
-  const sumTeamsBets = (teams: Team[]) => {
-    return teams.reduce((acc, cur) => acc + cur.bet, 0);
   };
 
   const channel = pusherClient.subscribe("channel");
@@ -121,14 +119,15 @@ const Page = () => {
       setSelectedTeams([]);
       return;
     }
-
     const prizePool = calcBetsSum(teams);
-
     const winnersTeams = updateWinnersTeamsPoints(selectedTeams, prizePool);
-
     const newTeams = mergeTeamsById(teams, winnersTeams);
+
     setSelectedTeams([]);
-    setTeams(newTeams);
+
+    updateTeams(newTeams).then((teams: Team[]) => {
+      setTeams(teams);
+    });
   };
 
   return (
