@@ -1,16 +1,18 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import LoadingSpinner from "@/components/ui/loadingSpinner";
-import Team from "@/types/team";
 import Input from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { betSchema } from "@/lib/zod/zodSchema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { pusherClient } from "@/lib/pusher/pusher";
 import Button from "@/components/ui/button";
+
+import { betSchema } from "@/lib/zod/zodSchema";
+import { pusherClient } from "@/lib/pusher/pusher";
+
+import Team from "@/types/team";
 
 type BetFormData = z.infer<typeof betSchema>;
 
@@ -56,7 +58,7 @@ const Page = ({ params }: { params: { teamId: string } }) => {
   }
 
   async function onSubmit(data: BetFormData) {
-    const teamPoints = team!.points - data.bet;
+    const teamPoints = +(team!.points - data.bet).toFixed(2);
     const res = await fetch(`/api/team/${team!.id}`, {
       method: "PATCH",
       headers: {
@@ -99,6 +101,7 @@ const Page = ({ params }: { params: { teamId: string } }) => {
             label="Bet"
             name="bet"
             id="bet"
+            step="0.01"
           />
           <Button
             type="submit"

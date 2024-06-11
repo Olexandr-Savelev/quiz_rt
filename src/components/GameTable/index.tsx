@@ -52,8 +52,8 @@ export default function GameTable({
             <tr
               key={team.id}
               className={cn(
-                "bg-gray-300 border-b border-black text-black",
-                selectedTeams.includes(team) && "bg-green-200"
+                "bg-gray-200 border-b-2 border-black text-black",
+                selectedTeams.includes(team) && "bg-green-300"
               )}
               onClick={() => handleRowClick(team)}
             >

@@ -116,18 +116,26 @@ const Page = () => {
 
   const onRoundEnds = () => {
     if (teams.length === selectedTeams.length || selectedTeams.length === 0) {
+      const newTeams = teams.map((team: Team) => {
+        team.points += team.bet;
+        team.bet = 0;
+        return team;
+      });
+      updateTeams(newTeams).then((teams: Team[]) => {
+        setTeams(teams);
+      });
+    } else {
+      const prizePool = calcBetsSum(teams);
+      const winnersTeams = updateWinnersTeamsPoints(selectedTeams, prizePool);
+      const newTeams = mergeTeamsById(teams, winnersTeams);
+
       setSelectedTeams([]);
-      return;
+
+      updateTeams(newTeams).then((teams: Team[]) => {
+        setTeams(teams);
+      });
     }
-    const prizePool = calcBetsSum(teams);
-    const winnersTeams = updateWinnersTeamsPoints(selectedTeams, prizePool);
-    const newTeams = mergeTeamsById(teams, winnersTeams);
-
     setSelectedTeams([]);
-
-    updateTeams(newTeams).then((teams: Team[]) => {
-      setTeams(teams);
-    });
   };
 
   return (
@@ -153,8 +161,6 @@ const Page = () => {
       >
         End round
       </button>
-
-      <h2>ADMIN PAGE</h2>
       <div className="relative overflow-x-auto">
         <GameTable
           teams={teams}

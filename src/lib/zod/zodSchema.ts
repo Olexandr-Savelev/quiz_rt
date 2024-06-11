@@ -23,7 +23,7 @@ export const addTeamSchema = z.object({
 export const betSchema = z.object({
   bet: z.preprocess(
     (value) => {
-      const parsedValue = parseInt(z.string().parse(value), 10);
+      const parsedValue = parseFloat(z.string().parse(value));
       return isNaN(parsedValue) ? undefined : parsedValue;
     },
     z

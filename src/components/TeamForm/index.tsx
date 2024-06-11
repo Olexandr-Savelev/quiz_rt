@@ -69,6 +69,7 @@ export default function TeamForm() {
         label="Points"
         error={errors?.points?.message}
         required
+        step="0.01"
       />
       <Button
         disabled={isSubmitting || !isValid}
