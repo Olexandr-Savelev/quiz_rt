@@ -7,6 +7,7 @@ import { addTeamSchema } from "@/lib/zod/zodSchema";
 
 import Input from "../ui/input";
 import { useRouter } from "next/navigation";
+import Button from "../ui/button";
 
 type TeamFormData = z.infer<typeof addTeamSchema>;
 
@@ -69,13 +70,13 @@ export default function TeamForm() {
         error={errors?.points?.message}
         required
       />
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 border border-blue-700 rounded disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
+      <Button
         disabled={isSubmitting || !isValid}
         type="submit"
+        loading={isSubmitting}
       >
         {isSubmitting ? "Submitting..." : "Submit"}
-      </button>
+      </Button>
     </form>
   );
 }

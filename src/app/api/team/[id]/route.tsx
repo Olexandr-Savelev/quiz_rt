@@ -26,12 +26,22 @@ export async function GET(
   }
 }
 
-export async function POST(
+export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const { bet, points } = await req.json();
+
+    await prisma.team.update({
+      where: {
+        id: params.id,
+      },
+      data: {
+        bet: bet,
+        points: points,
+      },
+    });
 
     await pusherServer.trigger("channel", "placeBet", {
       teamId: params.id,

@@ -1,14 +1,25 @@
+import { cn } from "@/lib/utils";
 import React from "react";
 
-export default function LoadingSpinner() {
+interface LoadingSpinnerProps {
+  size?: "sm" | "md" | "lg";
+}
+
+export default function LoadingSpinner({ size = "md" }: LoadingSpinnerProps) {
   return (
     <div
-      className="flex mt-3 w-full items-center justify-center"
+      className={cn(
+        "flex mt-3 w-full items-center justify-center",
+        size === "sm" && "mt-0 w-auto"
+      )}
       role="status"
     >
       <svg
         aria-hidden="true"
-        className="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+        className={cn(
+          "inline w-8 h-8 text-gray-200 animate-spin fill-blue-600",
+          size === "sm" && "w-6 h-6 fill-white"
+        )}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
