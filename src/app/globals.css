@@ -8,6 +8,14 @@
 body {
 }
 
+@layer base {
+  html {
+    background-color: #000000;
+    color: #fafafa;
+    font-size: 18px;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

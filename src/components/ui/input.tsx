@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { InputHTMLAttributes } from "react";
-import { FieldValues, UseFormRegister } from "react-hook-form";
 
 interface Props extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;

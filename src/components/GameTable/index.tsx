@@ -19,7 +19,7 @@ export default function GameTable({
   return (
     <>
       <table className="w-full text-sm text-left rtl:text-right text-gray-500">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+        <thead className="text-xs text-gray-100 uppercase bg-gray-700">
           <tr>
             <th
               scope="col"
@@ -52,8 +52,8 @@ export default function GameTable({
             <tr
               key={team.id}
               className={cn(
-                "bg-white border-b",
-                selectedTeams.includes(team) && "bg-green-100"
+                "bg-gray-300 border-b border-black text-black",
+                selectedTeams.includes(team) && "bg-green-200"
               )}
               onClick={() => handleRowClick(team)}
             >
