@@ -16,7 +16,7 @@ export const addTeamSchema = z.object({
         required_error: "Required field",
         invalid_type_error: "Invalid number",
       })
-      .nonnegative("Must be a non-negative number")
+      .positive("Must be a positive number")
   ),
 });
 
@@ -31,6 +31,6 @@ export const betSchema = z.object({
         required_error: "Required field",
         invalid_type_error: "Invalid number",
       })
-      .nonnegative("Must be a non-negative number")
+      .positive("Must be a positive number")
   ),
 });

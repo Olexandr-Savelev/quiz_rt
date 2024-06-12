@@ -17,7 +17,7 @@ export default function LoadingSpinner({ size = "md" }: LoadingSpinnerProps) {
       <svg
         aria-hidden="true"
         className={cn(
-          "inline w-8 h-8 text-gray-200 animate-spin fill-blue-600",
+          "inline w-10 h-10 text-gray-200 animate-spin fill-blue-600",
           size === "sm" && "w-6 h-6 fill-white"
         )}
         viewBox="0 0 100 101"

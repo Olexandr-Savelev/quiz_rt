@@ -129,8 +129,6 @@ const Page = () => {
       const winnersTeams = updateWinnersTeamsPoints(selectedTeams, prizePool);
       const newTeams = mergeTeamsById(teams, winnersTeams);
 
-      setSelectedTeams([]);
-
       updateTeams(newTeams).then((teams: Team[]) => {
         setTeams(teams);
       });

@@ -19,6 +19,8 @@ type BetFormData = z.infer<typeof betSchema>;
 const Page = ({ params }: { params: { teamId: string } }) => {
   const [isBetPlaced, setIsBetPlaced] = useState<boolean>(false);
   const [team, setTeam] = useState<Team | null>(null);
+  const [message, setMessage] = useState<string>("");
+  const [errMessage, setErrMessage] = useState<string>("");
 
   const {
     handleSubmit,
@@ -59,6 +61,10 @@ const Page = ({ params }: { params: { teamId: string } }) => {
 
   async function onSubmit(data: BetFormData) {
     const teamPoints = +(team!.points - data.bet).toFixed(2);
+    if (teamPoints < 0) {
+      setErrMessage("You can't bet this number of points.");
+      return;
+    }
     const res = await fetch(`/api/team/${team!.id}`, {
       method: "PATCH",
       headers: {
@@ -74,31 +80,51 @@ const Page = ({ params }: { params: { teamId: string } }) => {
       points: teamPoints,
       bet: data.bet,
     });
+    if (message) {
+      setMessage("");
+    }
     setIsBetPlaced(true);
   }
 
   if (!team) return <LoadingSpinner />;
   return (
-    <div className="w-full p-4 sm:py-4">
-      <div className="w-full max-w-full min-h-[75vh] rounded shadow-lg shadow-gray-800 px-6 py-10 flex flex-col justify-center border border-gray-900">
+    <div className="w-full px-2 md:py-4">
+      <div className="w-full max-w-full min-h-[85vh] rounded shadow-lg shadow-gray-800 px-2 py-6 flex flex-col justify-center border border-gray-900 md:px-6 md:py-10">
         <h2 className="w-full text-4xl text-center mb-4 font-bold">
           {team.name}
         </h2>
         <p className="w-full text-3xl text-center text-gray-300 mb-4">
           Points: {team.points}
         </p>
-        <div className="flex items-center my-6 w-full grow">
+        <div className="w-full h-1 mx-auto overflow-hidden rounded-full">
+          <div className="animated-gradient h-full"></div>
+        </div>
+        <div className="flex flex-col justify-center my-6 w-full grow gap-4">
           <p className="text-4xl text-gray-400 w-full text-center">
             {!isBetPlaced ? "Place Your Bet" : `Your Bet: ${team.bet}`}
           </p>
+          {message && (
+            <p className="w-full text-xl text-center text-red-300 mb-4">
+              {message}
+            </p>
+          )}
         </div>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="flex flex-col gap-2"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <Input
             register={register}
             defaultValue={team.bet}
             disabled={isBetPlaced}
             type="number"
             label="Bet"
+            onChange={() => {
+              if (errMessage) {
+                setErrMessage("");
+              }
+            }}
+            error={errors?.bet?.message || errMessage}
             name="bet"
             id="bet"
             step="0.01"

@@ -31,12 +31,6 @@ export default function GameTable({
               scope="col"
               className="px-6 py-3"
             >
-              Points
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3"
-            >
               Bet
             </th>
             <th
@@ -44,6 +38,12 @@ export default function GameTable({
               className="px-6 py-3"
             >
               Actions
+            </th>
+            <th
+              scope="col"
+              className="px-6 py-3"
+            >
+              Points
             </th>
           </tr>
         </thead>
@@ -53,21 +53,22 @@ export default function GameTable({
               key={team.id}
               className={cn(
                 "bg-gray-200 border-b-2 border-black text-black",
-                selectedTeams.includes(team) && "bg-green-300"
+                selectedTeams.includes(team) && "bg-blue-400"
               )}
               onClick={() => handleRowClick(team)}
             >
               <th
                 scope="row"
-                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                className="px-6 py-4 font-bold text-xl text-gray-900 whitespace-nowrap"
               >
                 {team.name}
               </th>
-              <td className="px-6 py-4">{team.points}</td>
-              <td className="px-6 py-4">{team.bet}</td>
+
+              <td className="px-6 py-4 font-bold">{team.bet}</td>
               <td className="px-6 py-4">
                 <button>Edit</button>
               </td>
+              <td className="px-6 py-4 font-bold text-xl">{team.points}</td>
             </tr>
           ))}
         </tbody>
