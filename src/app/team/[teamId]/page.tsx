@@ -24,13 +24,14 @@ const Page = ({ params }: { params: { teamId: string } }) => {
 
   const {
     handleSubmit,
+    trigger,
     register,
     formState: { errors, isSubmitting, isValid },
   } = useForm({
     resolver: zodResolver(betSchema),
     mode: "all",
     defaultValues: {
-      bet: 0,
+      bet: 1,
     },
   });
 
@@ -61,6 +62,10 @@ const Page = ({ params }: { params: { teamId: string } }) => {
 
   async function onSubmit(data: BetFormData) {
     const teamPoints = +(team!.points - data.bet).toFixed(2);
+    if (data.bet < 1) {
+      setErrMessage("Minimum 1");
+      return;
+    }
     if (teamPoints < 0) {
       setErrMessage("You can't bet this number of points.");
       return;
@@ -119,13 +124,13 @@ const Page = ({ params }: { params: { teamId: string } }) => {
             disabled={isBetPlaced}
             type="number"
             label="Bet"
+            name="bet"
             onChange={() => {
               if (errMessage) {
                 setErrMessage("");
               }
             }}
             error={errors?.bet?.message || errMessage}
-            name="bet"
             id="bet"
             step="0.01"
           />

@@ -14,6 +14,9 @@ import {
   calcBetsSum,
   updateWinnersTeamsPoints,
 } from "@/lib/helpers/pointsCalculations";
+import Modal from "@/components/ui/modal";
+import TeamForm from "@/components/TeamForm";
+import { set } from "zod";
 
 async function getTeams() {
   const res = await fetch("/api/team", { method: "GET" });
@@ -48,8 +51,19 @@ async function updateTeams(teams: Team[]) {
 const Page = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<Team[]>([]);
+  const [teamToEdit, setTeamToEdit] = useState<Team | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { isGame, startGame, endGame } = useGameStatus();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleTeamToEdit = (team: Team) => {
+    setTeamToEdit(team);
+    setIsModalOpen(true);
+  };
 
   const handleSelectedTeams = (team: Team) => {
     setSelectedTeams((prevSelectedTeams) => {
@@ -164,9 +178,18 @@ const Page = () => {
           teams={teams}
           selectedTeams={selectedTeams}
           handleSelectedTeams={handleSelectedTeams}
+          setTeamToEdit={handleTeamToEdit}
         />
         {isLoading && <LoadingSpinner />}
       </div>
+      {isModalOpen && (
+        <Modal closeModal={closeModal}>
+          <TeamForm
+            type="edit"
+            team={teamToEdit}
+          />
+        </Modal>
+      )}
     </>
   );
 };

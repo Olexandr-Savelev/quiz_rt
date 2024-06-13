@@ -38,3 +38,30 @@ body {
   background-size: 200% 200%;
   animation: gradient 6s ease infinite;
 }
+
+.close {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  margin-left: auto;
+  cursor: pointer;
+}
+.close:hover {
+  opacity: 0.5;
+}
+.close:before,
+.close:after {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  content: " ";
+  height: 33px;
+  width: 2px;
+  background-color: white;
+}
+.close:before {
+  transform: rotate(45deg);
+}
+.close:after {
+  transform: rotate(-45deg);
+}

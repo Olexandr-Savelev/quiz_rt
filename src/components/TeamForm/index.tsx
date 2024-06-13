@@ -9,9 +9,16 @@ import Input from "../ui/input";
 import { useRouter } from "next/navigation";
 import Button from "../ui/button";
 
+import Team from "@/types/team";
+
 type TeamFormData = z.infer<typeof addTeamSchema>;
 
-export default function TeamForm() {
+interface TeamFormProps {
+  type?: "add" | "edit";
+  team?: Team | null;
+}
+
+export default function TeamForm({ type = "add", team }: TeamFormProps) {
   const router = useRouter();
 
   const {
@@ -22,12 +29,20 @@ export default function TeamForm() {
     resolver: zodResolver(addTeamSchema),
     mode: "all",
     defaultValues: {
-      teamName: "",
-      points: 0,
+      teamName: type === "add" ? "" : team?.name,
+      points: type === "add" ? 0 : team?.points,
+      bet: type === "add" ? 0 : team?.bet,
     },
   });
 
   async function onSubmit(data: TeamFormData) {
+    if (type === "add") {
+      addTeam(data);
+    } else {
+    }
+  }
+
+  async function addTeam(data: TeamFormData) {
     try {
       const res = await fetch("/api/team", {
         method: "POST",
@@ -48,9 +63,11 @@ export default function TeamForm() {
     }
   }
 
+  async function updateTeam() {}
+
   return (
     <form
-      className="flex flex-col gap-2 p-10"
+      className="flex flex-col gap-2 p-5 md:min-w-4 xl"
       method="POST"
       onSubmit={handleSubmit(onSubmit)}
     >
@@ -71,6 +88,17 @@ export default function TeamForm() {
         required
         step="0.01"
       />
+      {type === "edit" && (
+        <Input
+          register={register}
+          name="bet"
+          type="number"
+          label="Bet"
+          error={errors?.bet?.message}
+          required
+          step="0.01"
+        />
+      )}
       <Button
         disabled={isSubmitting || !isValid}
         type="submit"

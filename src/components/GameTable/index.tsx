@@ -5,12 +5,14 @@ interface GameTableProps {
   teams: Team[];
   selectedTeams: Team[];
   handleSelectedTeams: (team: Team) => void;
+  setTeamToEdit: (team: Team) => void;
 }
 
 export default function GameTable({
   teams,
   selectedTeams,
   handleSelectedTeams,
+  setTeamToEdit,
 }: GameTableProps) {
   const handleRowClick = (team: Team) => {
     handleSelectedTeams(team);
@@ -66,7 +68,14 @@ export default function GameTable({
 
               <td className="px-6 py-4 font-bold">{team.bet}</td>
               <td className="px-6 py-4">
-                <button>Edit</button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTeamToEdit(team);
+                  }}
+                >
+                  Edit
+                </button>
               </td>
               <td className="px-6 py-4 font-bold text-xl">{team.points}</td>
             </tr>
