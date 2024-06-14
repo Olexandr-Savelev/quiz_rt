@@ -44,6 +44,13 @@ const Page = ({ params }: { params: { teamId: string } }) => {
       getTeam(params.teamId);
     });
 
+    channel.bind("updateTeam", (teamToUpdate: Team) => {
+      console.log(teamToUpdate);
+      if (teamToUpdate.id === params.teamId) {
+        setTeam(teamToUpdate);
+      }
+    });
+
     return () => {
       channel.unbind_all();
       channel.unsubscribe();

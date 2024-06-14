@@ -18,18 +18,7 @@ export const addTeamSchema = z.object({
       })
       .positive("Must be a positive number")
   ),
-  bet: z.preprocess(
-    (value) => {
-      const parsedValue = parseFloat(z.string().parse(value));
-      return isNaN(parsedValue) ? undefined : parsedValue;
-    },
-    z
-      .number({
-        required_error: "Required field",
-        invalid_type_error: "Invalid number",
-      })
-      .positive("Must be a positive number")
-  ),
+  bet: z.coerce.number().positive("Must be a positive number").optional(),
 });
 
 export const betSchema = z.object({

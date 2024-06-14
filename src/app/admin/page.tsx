@@ -12,11 +12,11 @@ import Team from "@/types/team";
 import useGameStatus from "@/hooks/useGameStatus";
 import {
   calcBetsSum,
+  returnBets,
   updateWinnersTeamsPoints,
 } from "@/lib/helpers/pointsCalculations";
 import Modal from "@/components/ui/modal";
 import TeamForm from "@/components/TeamForm";
-import { set } from "zod";
 
 async function getTeams() {
   const res = await fetch("/api/team", { method: "GET" });
@@ -26,7 +26,6 @@ async function getTeams() {
 }
 
 async function updateTeams(teams: Team[]) {
-  console.log(teams);
   try {
     const res = await fetch("/api/team", {
       method: "PATCH",
@@ -41,7 +40,7 @@ async function updateTeams(teams: Team[]) {
     }
 
     const { updatedTeams } = await res.json();
-    console.log(updatedTeams);
+
     return updatedTeams;
   } catch (error) {
     console.error(error);
@@ -95,6 +94,7 @@ const Page = () => {
       });
 
     channel.bind("addTeam", addTeam);
+    channel.bind("updateTeam", updateTeam);
 
     return () => {
       channel.unbind_all();
@@ -106,6 +106,10 @@ const Page = () => {
     channel.unbind("placeBet");
     channel.bind("placeBet", placeBet);
   }, [JSON.stringify(teams)]);
+
+  function updateTeam(team: Team) {
+    setTeams((prev) => prev.map((t) => (t.id === team.id ? team : t)));
+  }
 
   function addTeam(team: Team) {
     setTeams((prev) => [...prev, team]);
@@ -129,18 +133,23 @@ const Page = () => {
   }
 
   const onRoundEnds = () => {
-    if (teams.length === selectedTeams.length || selectedTeams.length === 0) {
-      const newTeams = teams.map((team: Team) => {
-        team.points += team.bet;
-        team.bet = 0;
-        return team;
-      });
+    const winnersBetSum = calcBetsSum(selectedTeams);
+    if (
+      teams.length === selectedTeams.length ||
+      selectedTeams.length === 0 ||
+      winnersBetSum === 0
+    ) {
+      const newTeams = returnBets(teams);
       updateTeams(newTeams).then((teams: Team[]) => {
         setTeams(teams);
       });
     } else {
       const prizePool = calcBetsSum(teams);
-      const winnersTeams = updateWinnersTeamsPoints(selectedTeams, prizePool);
+      const winnersTeams = updateWinnersTeamsPoints(
+        selectedTeams,
+        prizePool,
+        winnersBetSum
+      );
       const newTeams = mergeTeamsById(teams, winnersTeams);
 
       updateTeams(newTeams).then((teams: Team[]) => {
@@ -187,6 +196,7 @@ const Page = () => {
           <TeamForm
             type="edit"
             team={teamToEdit}
+            closeModal={closeModal}
           />
         </Modal>
       )}

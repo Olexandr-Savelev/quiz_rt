@@ -1,5 +1,6 @@
 import prisma from "@/lib/db/db";
 import { pusherServer } from "@/lib/pusher/pusher";
+import Team from "@/types/team";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -48,6 +49,28 @@ export async function PATCH(
       bet: bet,
       points: points,
     });
+
+    return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
+  } catch (error) {
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "Internal server error" }),
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const { id, ...dataToUpdate }: Team = await req.json();
+
+    const updatedTeam = await prisma.team.update({
+      where: {
+        id: id,
+      },
+      data: dataToUpdate,
+    });
+
+    await pusherServer.trigger("channel", "updateTeam", updatedTeam);
 
     return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {

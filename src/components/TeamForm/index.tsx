@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { set, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addTeamSchema } from "@/lib/zod/zodSchema";
 
@@ -10,16 +10,34 @@ import { useRouter } from "next/navigation";
 import Button from "../ui/button";
 
 import Team from "@/types/team";
+import { useEffect, useState } from "react";
 
 type TeamFormData = z.infer<typeof addTeamSchema>;
 
 interface TeamFormProps {
   type?: "add" | "edit";
   team?: Team | null;
+  closeModal?: () => void;
 }
 
-export default function TeamForm({ type = "add", team }: TeamFormProps) {
+export default function TeamForm({
+  type = "add",
+  team,
+  closeModal,
+}: TeamFormProps) {
+  const [pointsAmount, setPointsAmount] = useState<number>(0);
+  const [pointsInput, setPointsInput] = useState<number>(0);
+  const [betInput, setBetInput] = useState<number>(0);
+
   const router = useRouter();
+
+  useEffect(() => {
+    if (type === "edit" && team) {
+      setPointsAmount(team.points + team.bet);
+      setPointsInput(team.points);
+      setBetInput(team.bet);
+    }
+  }, [type, team]);
 
   const {
     handleSubmit,
@@ -31,15 +49,12 @@ export default function TeamForm({ type = "add", team }: TeamFormProps) {
     defaultValues: {
       teamName: type === "add" ? "" : team?.name,
       points: type === "add" ? 0 : team?.points,
-      bet: type === "add" ? 0 : team?.bet,
+      bet: type === "add" ? undefined : team?.bet,
     },
   });
 
   async function onSubmit(data: TeamFormData) {
-    if (type === "add") {
-      addTeam(data);
-    } else {
-    }
+    type === "add" ? await addTeam(data) : await updateTeam(data);
   }
 
   async function addTeam(data: TeamFormData) {
@@ -63,7 +78,29 @@ export default function TeamForm({ type = "add", team }: TeamFormProps) {
     }
   }
 
-  async function updateTeam() {}
+  async function updateTeam(data: TeamFormData) {
+    try {
+      const res = await fetch(`/api/team/${team!.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...team!,
+          name: data.teamName,
+          points: pointsInput,
+          bet: data.bet,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit the data. Please try again.");
+      }
+      closeModal!();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <form
@@ -84,6 +121,13 @@ export default function TeamForm({ type = "add", team }: TeamFormProps) {
         name="points"
         type="number"
         label="Points"
+        value={type === "edit" ? pointsInput : undefined}
+        onChange={(e) => {
+          const points = +e.target.value;
+          setPointsAmount(points);
+          setPointsInput(points);
+          setBetInput(0);
+        }}
         error={errors?.points?.message}
         required
         step="0.01"
@@ -94,8 +138,17 @@ export default function TeamForm({ type = "add", team }: TeamFormProps) {
           name="bet"
           type="number"
           label="Bet"
+          value={type === "edit" ? betInput : undefined}
+          onChange={(e) => {
+            const bet = +e.target.value;
+            setBetInput(bet);
+            if (bet > 0) {
+              setPointsInput(+(pointsAmount - bet).toFixed(2));
+            } else {
+              setPointsInput(pointsAmount);
+            }
+          }}
           error={errors?.bet?.message}
-          required
           step="0.01"
         />
       )}

@@ -14,10 +14,6 @@ export default function GameTable({
   handleSelectedTeams,
   setTeamToEdit,
 }: GameTableProps) {
-  const handleRowClick = (team: Team) => {
-    handleSelectedTeams(team);
-  };
-
   return (
     <>
       <table className="w-full text-sm text-left rtl:text-right text-gray-500">
@@ -57,7 +53,7 @@ export default function GameTable({
                 "bg-gray-200 border-b-2 border-black text-black",
                 selectedTeams.includes(team) && "bg-blue-400"
               )}
-              onClick={() => handleRowClick(team)}
+              onClick={() => handleSelectedTeams(team)}
             >
               <th
                 scope="row"
