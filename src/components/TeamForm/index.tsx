@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { set, z } from "zod";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addTeamSchema } from "@/lib/zod/zodSchema";
 
@@ -41,11 +41,12 @@ export default function TeamForm({
 
   const {
     handleSubmit,
+    setValue,
     register,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors, isSubmitting },
   } = useForm<TeamFormData>({
     resolver: zodResolver(addTeamSchema),
-    mode: "all",
+    mode: "onSubmit",
     defaultValues: {
       teamName: type === "add" ? "" : team?.name,
       points: type === "add" ? 0 : team?.points,
@@ -89,7 +90,7 @@ export default function TeamForm({
           ...team!,
           name: data.teamName,
           points: pointsInput,
-          bet: data.bet,
+          bet: betInput,
         }),
       });
 
@@ -102,9 +103,26 @@ export default function TeamForm({
     }
   }
 
+  async function deleteTeam(id: string) {
+    try {
+      const res = await fetch(`/api/team/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit the data. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <form
-      className="flex flex-col gap-2 p-5 md:min-w-4 xl"
+      className="flex flex-col gap-2 md:min-w-4 xl"
       method="POST"
       onSubmit={handleSubmit(onSubmit)}
     >
@@ -114,7 +132,6 @@ export default function TeamForm({
         name="teamName"
         label="Team name"
         error={errors?.teamName?.message}
-        required
       />
       <Input
         register={register}
@@ -123,13 +140,12 @@ export default function TeamForm({
         label="Points"
         value={type === "edit" ? pointsInput : undefined}
         onChange={(e) => {
-          const points = +e.target.value;
+          const points = Number((+e.target.value).toFixed(2));
           setPointsAmount(points);
           setPointsInput(points);
           setBetInput(0);
         }}
         error={errors?.points?.message}
-        required
         step="0.01"
       />
       {type === "edit" && (
@@ -141,11 +157,14 @@ export default function TeamForm({
           value={type === "edit" ? betInput : undefined}
           onChange={(e) => {
             const bet = +e.target.value;
-            setBetInput(bet);
+            setBetInput(Number(bet.toFixed(2)));
+            const points = Number((pointsAmount - bet).toFixed(2));
             if (bet > 0) {
-              setPointsInput(+(pointsAmount - bet).toFixed(2));
+              setPointsInput(points);
+              setValue("points", points);
             } else {
               setPointsInput(pointsAmount);
+              setValue("points", pointsAmount);
             }
           }}
           error={errors?.bet?.message}
@@ -153,12 +172,28 @@ export default function TeamForm({
         />
       )}
       <Button
-        disabled={isSubmitting || !isValid}
+        disabled={isSubmitting}
         type="submit"
         loading={isSubmitting}
       >
         {isSubmitting ? "Submitting..." : "Submit"}
       </Button>
+      {type === "edit" && (
+        <Button
+          type="button"
+          className="mt-1"
+          variant="warn"
+          onClick={async () => {
+            let del = confirm("Are you sure?");
+            if (del) {
+              await deleteTeam(team!.id);
+              closeModal!();
+            }
+          }}
+        >
+          Delete
+        </Button>
+      )}
     </form>
   );
 }

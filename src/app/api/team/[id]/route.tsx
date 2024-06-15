@@ -80,3 +80,25 @@ export async function PUT(req: NextRequest) {
     );
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await prisma.team.delete({
+      where: {
+        id: params.id,
+      },
+    });
+
+    await pusherServer.trigger("channel", "deleteTeam", params.id);
+
+    return new NextResponse(JSON.stringify({ success: true }), { status: 200 });
+  } catch (error) {
+    return new NextResponse(
+      JSON.stringify({ success: false, message: "Internal server error" }),
+      { status: 500 }
+    );
+  }
+}

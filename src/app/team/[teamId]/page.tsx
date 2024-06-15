@@ -24,12 +24,11 @@ const Page = ({ params }: { params: { teamId: string } }) => {
 
   const {
     handleSubmit,
-    trigger,
     register,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(betSchema),
-    mode: "all",
+    mode: "onSubmit",
     defaultValues: {
       bet: 1,
     },
@@ -44,18 +43,19 @@ const Page = ({ params }: { params: { teamId: string } }) => {
       getTeam(params.teamId);
     });
 
-    channel.bind("updateTeam", (teamToUpdate: Team) => {
-      console.log(teamToUpdate);
-      if (teamToUpdate.id === params.teamId) {
-        setTeam(teamToUpdate);
-      }
-    });
+    channel.bind("updateTeam", updateTeam);
 
     return () => {
       channel.unbind_all();
       channel.unsubscribe();
     };
   }, []);
+
+  function updateTeam(teamToUpdate: Team) {
+    if (teamToUpdate.id === params.teamId) {
+      setTeam(teamToUpdate);
+    }
+  }
 
   async function getTeam(teamId: string) {
     const res = await fetch(`/api/team/${teamId}`);

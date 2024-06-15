@@ -50,10 +50,10 @@ async function updateTeams(teams: Team[]) {
 const Page = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<Team[]>([]);
-  const [teamToEdit, setTeamToEdit] = useState<Team | null>(null);
+  const [teamToEdit, setTeamToEdit] = useState<Team>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { isGame, startGame, endGame } = useGameStatus();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isGame, startGame, endGame } = useGameStatus();
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -95,6 +95,7 @@ const Page = () => {
 
     channel.bind("addTeam", addTeam);
     channel.bind("updateTeam", updateTeam);
+    channel.bind("deleteTeam", deleteTeamAction);
 
     return () => {
       channel.unbind_all();
@@ -106,6 +107,10 @@ const Page = () => {
     channel.unbind("placeBet");
     channel.bind("placeBet", placeBet);
   }, [JSON.stringify(teams)]);
+
+  function deleteTeamAction(id: string) {
+    setTeams((prev) => prev.filter((team) => team.id !== id));
+  }
 
   function updateTeam(team: Team) {
     setTeams((prev) => prev.map((t) => (t.id === team.id ? team : t)));
@@ -193,11 +198,13 @@ const Page = () => {
       </div>
       {isModalOpen && (
         <Modal closeModal={closeModal}>
-          <TeamForm
-            type="edit"
-            team={teamToEdit}
-            closeModal={closeModal}
-          />
+          <div className="flex flex-col gap-4 py-3 md:px-6 md:min-w-[640px]">
+            <TeamForm
+              type="edit"
+              team={teamToEdit}
+              closeModal={closeModal}
+            />
+          </div>
         </Modal>
       )}
     </>
