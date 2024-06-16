@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import Button from "../ui/button";
 
 import Team from "@/types/team";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 type TeamFormData = z.infer<typeof addTeamSchema>;
 
@@ -116,6 +116,33 @@ export default function TeamForm({
     }
   }
 
+  const handlePoints = (event: ChangeEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement;
+    const points = Number(Number(target.value).toFixed(2));
+
+    setPointsAmount(points);
+    setValue("bet", 0);
+  };
+
+  const handleBet = (event: ChangeEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement;
+    const bet = Number(target.value);
+    const points = Number((pointsAmount - bet).toFixed(2));
+    if (bet > 0) {
+      setValue("points", points);
+    } else {
+      setValue("points", pointsAmount);
+    }
+  };
+
+  const onDelete = async () => {
+    let del = confirm("Are you sure?");
+    if (del) {
+      await deleteTeam(team!.id);
+      closeModal!();
+    }
+  };
+
   return (
     <form
       className="flex flex-col gap-2 md:min-w-4 xl"
@@ -134,11 +161,7 @@ export default function TeamForm({
         name="points"
         type="number"
         label="Points"
-        onChange={(e) => {
-          const points = Number((+e.target.value).toFixed(2));
-          setPointsAmount(points);
-          setValue("bet", 0);
-        }}
+        onChange={handlePoints}
         error={errors?.points?.message}
         step="0.01"
       />
@@ -148,15 +171,7 @@ export default function TeamForm({
           name="bet"
           type="number"
           label="Bet"
-          onChange={(e) => {
-            const bet = +e.target.value;
-            const points = Number((pointsAmount - bet).toFixed(2));
-            if (bet > 0) {
-              setValue("points", points);
-            } else {
-              setValue("points", pointsAmount);
-            }
-          }}
+          onChange={handleBet}
           error={errors?.bet?.message}
           step="0.01"
         />
@@ -173,13 +188,7 @@ export default function TeamForm({
           type="button"
           className="mt-1"
           variant="warn"
-          onClick={async () => {
-            let del = confirm("Are you sure?");
-            if (del) {
-              await deleteTeam(team!.id);
-              closeModal!();
-            }
-          }}
+          onClick={onDelete}
         >
           Delete
         </Button>

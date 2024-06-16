@@ -13,6 +13,7 @@ import { betSchema } from "@/lib/zod/zodSchema";
 import { pusherClient } from "@/lib/pusher/pusher";
 
 import Team from "@/types/team";
+import AnimatedLine from "@/components/ui/animatedLine";
 
 type BetFormData = z.infer<typeof betSchema>;
 
@@ -49,11 +50,13 @@ const Page = ({ params }: { params: { teamId: string } }) => {
       channel.unbind_all();
       channel.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function updateTeam(teamToUpdate: Team) {
     if (teamToUpdate.id === params.teamId) {
       setTeam(teamToUpdate);
+      teamToUpdate.bet !== 0 ? setIsBetPlaced(true) : setIsBetPlaced(false);
     }
   }
 
@@ -68,7 +71,7 @@ const Page = ({ params }: { params: { teamId: string } }) => {
   }
 
   async function onSubmit(data: BetFormData) {
-    const teamPoints = +(team!.points - data.bet).toFixed(2);
+    const teamPoints = Number((team!.points - data.bet).toFixed(2));
     if (data.bet < 1) {
       setError("bet", { message: "Minimum 1" });
       return;
@@ -98,7 +101,7 @@ const Page = ({ params }: { params: { teamId: string } }) => {
 
   if (!team) return <LoadingSpinner />;
   return (
-    <div className="w-full px-2 md:py-4">
+    <div className="w-full md:py-4">
       <div className="w-full max-w-full min-h-[85vh] rounded shadow-lg shadow-gray-800 px-2 py-6 flex flex-col justify-center border border-gray-900 md:px-6 md:py-10">
         <h2 className="w-full text-4xl text-center mb-4 font-bold">
           {team.name}
@@ -106,9 +109,7 @@ const Page = ({ params }: { params: { teamId: string } }) => {
         <p className="w-full text-3xl text-center text-gray-300 mb-4">
           Points: {team.points}
         </p>
-        <div className="w-full h-1 mx-auto overflow-hidden rounded-full">
-          <div className="animated-gradient h-full"></div>
-        </div>
+        <AnimatedLine />
         <div className="flex flex-col justify-center my-6 w-full grow gap-4">
           <p className="text-4xl text-gray-400 w-full text-center">
             {!isBetPlaced ? "Place Your Bet" : `Your Bet: ${team.bet}`}

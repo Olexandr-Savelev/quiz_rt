@@ -30,7 +30,7 @@ export default function RootLayout({
           >
             Quiz Time
           </h1>
-          <div className="">{children}</div>
+          <div className="px-3">{children}</div>
         </div>
       </body>
     </html>

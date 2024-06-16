@@ -6,17 +6,11 @@ import GameTable from "@/components/GameTable";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 
 import { pusherClient } from "@/lib/pusher/pusher";
-import { mergeTeamsById } from "@/lib/helpers/mergeTeams";
 
 import Team from "@/types/team";
-import useGameStatus from "@/hooks/useGameStatus";
-import {
-  calcBetsSum,
-  returnBets,
-  updateWinnersTeamsPoints,
-} from "@/lib/helpers/pointsCalculations";
 import Modal from "@/components/ui/modal";
 import TeamForm from "@/components/TeamForm";
+import AdminDashboard from "@/components/AdminDashboard";
 
 async function getTeams() {
   const res = await fetch("/api/team", { method: "GET" });
@@ -25,38 +19,23 @@ async function getTeams() {
   return data.teams;
 }
 
-async function updateTeams(teams: Team[]) {
-  try {
-    const res = await fetch("/api/team", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(teams),
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to submit the data. Please try again.");
-    }
-
-    const { updatedTeams } = await res.json();
-
-    return updatedTeams;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 const Page = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<Team[]>([]);
   const [teamToEdit, setTeamToEdit] = useState<Team>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { isGame, startGame, endGame } = useGameStatus();
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const resetSelectedTeams = () => {
+    setSelectedTeams([]);
+  };
+
+  const handleAllTeams = (teams: Team[]) => {
+    setTeams(teams);
   };
 
   const handleTeamToEdit = (team: Team) => {
@@ -95,7 +74,7 @@ const Page = () => {
 
     channel.bind("addTeam", addTeam);
     channel.bind("updateTeam", updateTeam);
-    channel.bind("deleteTeam", deleteTeamAction);
+    channel.bind("deleteTeam", deleteTeam);
 
     return () => {
       channel.unbind_all();
@@ -108,7 +87,7 @@ const Page = () => {
     channel.bind("placeBet", placeBet);
   }, [JSON.stringify(teams)]);
 
-  function deleteTeamAction(id: string) {
+  function deleteTeam(id: string) {
     setTeams((prev) => prev.filter((team) => team.id !== id));
   }
 
@@ -137,56 +116,15 @@ const Page = () => {
     }
   }
 
-  const onRoundEnds = () => {
-    const winnersBetSum = calcBetsSum(selectedTeams);
-    if (
-      teams.length === selectedTeams.length ||
-      selectedTeams.length === 0 ||
-      winnersBetSum === 0
-    ) {
-      const newTeams = returnBets(teams);
-      updateTeams(newTeams).then((teams: Team[]) => {
-        setTeams(teams);
-      });
-    } else {
-      const prizePool = calcBetsSum(teams);
-      const winnersTeams = updateWinnersTeamsPoints(
-        selectedTeams,
-        prizePool,
-        winnersBetSum
-      );
-      const newTeams = mergeTeamsById(teams, winnersTeams);
-
-      updateTeams(newTeams).then((teams: Team[]) => {
-        setTeams(teams);
-      });
-    }
-    setSelectedTeams([]);
-  };
-
   return (
     <>
-      {!isGame ? (
-        <button
-          className="px-4 py-2 border border-black"
-          onClick={startGame}
-        >
-          Start Game
-        </button>
-      ) : (
-        <button
-          className="px-4 py-2 border border-black"
-          onClick={endGame}
-        >
-          Stop Game
-        </button>
-      )}
-      <button
-        className="px-4 py-2 border border-black"
-        onClick={onRoundEnds}
-      >
-        End round
-      </button>
+      <AdminDashboard
+        allTeams={teams}
+        selectedTeams={selectedTeams}
+        setAllTeams={handleAllTeams}
+        resetSelectedTeams={resetSelectedTeams}
+      />
+
       <div className="relative overflow-x-auto">
         <GameTable
           teams={teams}
