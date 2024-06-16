@@ -26,16 +26,12 @@ export default function TeamForm({
   closeModal,
 }: TeamFormProps) {
   const [pointsAmount, setPointsAmount] = useState<number>(0);
-  const [pointsInput, setPointsInput] = useState<number>(0);
-  const [betInput, setBetInput] = useState<number>(0);
 
   const router = useRouter();
 
   useEffect(() => {
     if (type === "edit" && team) {
       setPointsAmount(team.points + team.bet);
-      setPointsInput(team.points);
-      setBetInput(team.bet);
     }
   }, [type, team]);
 
@@ -89,8 +85,8 @@ export default function TeamForm({
         body: JSON.stringify({
           ...team!,
           name: data.teamName,
-          points: pointsInput,
-          bet: betInput,
+          points: data.points,
+          bet: data.bet,
         }),
       });
 
@@ -138,12 +134,10 @@ export default function TeamForm({
         name="points"
         type="number"
         label="Points"
-        value={type === "edit" ? pointsInput : undefined}
         onChange={(e) => {
           const points = Number((+e.target.value).toFixed(2));
           setPointsAmount(points);
-          setPointsInput(points);
-          setBetInput(0);
+          setValue("bet", 0);
         }}
         error={errors?.points?.message}
         step="0.01"
@@ -154,16 +148,12 @@ export default function TeamForm({
           name="bet"
           type="number"
           label="Bet"
-          value={type === "edit" ? betInput : undefined}
           onChange={(e) => {
             const bet = +e.target.value;
-            setBetInput(Number(bet.toFixed(2)));
             const points = Number((pointsAmount - bet).toFixed(2));
             if (bet > 0) {
-              setPointsInput(points);
               setValue("points", points);
             } else {
-              setPointsInput(pointsAmount);
               setValue("points", pointsAmount);
             }
           }}

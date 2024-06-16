@@ -19,12 +19,12 @@ type BetFormData = z.infer<typeof betSchema>;
 const Page = ({ params }: { params: { teamId: string } }) => {
   const [isBetPlaced, setIsBetPlaced] = useState<boolean>(false);
   const [team, setTeam] = useState<Team | null>(null);
-  const [message, setMessage] = useState<string>("");
   const [errMessage, setErrMessage] = useState<string>("");
 
   const {
     handleSubmit,
     register,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(betSchema),
@@ -70,11 +70,11 @@ const Page = ({ params }: { params: { teamId: string } }) => {
   async function onSubmit(data: BetFormData) {
     const teamPoints = +(team!.points - data.bet).toFixed(2);
     if (data.bet < 1) {
-      setErrMessage("Minimum 1");
+      setError("bet", { message: "Minimum 1" });
       return;
     }
     if (teamPoints < 0) {
-      setErrMessage("You can't bet this number of points.");
+      setError("bet", { message: "You can't bet this number of points." });
       return;
     }
     const res = await fetch(`/api/team/${team!.id}`, {
@@ -92,9 +92,7 @@ const Page = ({ params }: { params: { teamId: string } }) => {
       points: teamPoints,
       bet: data.bet,
     });
-    if (message) {
-      setMessage("");
-    }
+
     setIsBetPlaced(true);
   }
 
@@ -115,11 +113,6 @@ const Page = ({ params }: { params: { teamId: string } }) => {
           <p className="text-4xl text-gray-400 w-full text-center">
             {!isBetPlaced ? "Place Your Bet" : `Your Bet: ${team.bet}`}
           </p>
-          {message && (
-            <p className="w-full text-xl text-center text-red-300 mb-4">
-              {message}
-            </p>
-          )}
         </div>
         <form
           className="flex flex-col gap-2"
