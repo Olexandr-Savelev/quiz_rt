@@ -4,13 +4,13 @@ import React, { useEffect, useState } from "react";
 
 import GameTable from "@/components/GameTable";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
+import Modal from "@/components/ui/modal";
+import TeamForm from "@/components/TeamForm";
+import AdminDashboard from "@/components/AdminDashboard";
 
 import { pusherClient } from "@/lib/pusher/pusher";
 
 import Team from "@/types/team";
-import Modal from "@/components/ui/modal";
-import TeamForm from "@/components/TeamForm";
-import AdminDashboard from "@/components/AdminDashboard";
 
 async function getTeams() {
   const res = await fetch("/api/team", { method: "GET" });
@@ -132,8 +132,8 @@ const Page = () => {
           handleSelectedTeams={handleSelectedTeams}
           setTeamToEdit={handleTeamToEdit}
         />
-        {isLoading && <LoadingSpinner />}
       </div>
+      {isLoading && <LoadingSpinner />}
       {isModalOpen && (
         <Modal closeModal={closeModal}>
           <div className="flex flex-col gap-4 py-3 md:px-6 md:min-w-[640px]">
